@@ -1,23 +1,22 @@
-export default function Home() {
+import Link from "next/link";
+
+import { currentUser } from "../lib/auth";
+
+export default async function Home() {
+  const user = await currentUser();
   return (
     <main>
-      <h1>Next.js SaaS starter</h1>
-      <p>Routes:</p>
-      <ul>
-        <li>
-          <code>POST /api/signup</code>: assigns the Free plan.
-        </li>
-        <li>
-          <code>POST /api/generate</code>: checks the plan, returns 402 when the user is out of
-          credits, spends one after the work.
-        </li>
-        <li>
-          <code>POST /api/checkout</code>: Stripe Checkout tagged with the user id.
-        </li>
-      </ul>
+      <h1>Your SaaS</h1>
       <p>
-        Send <code>x-user-id</code> as a header until you plug in real auth in{" "}
-        <code>lib/auth.ts</code>.
+        A free plan with 10 AI credits a month, a paid plan with more. Sign in, spend credits, hit the
+        limit, upgrade with Stripe.
+      </p>
+      <p>
+        <Link href={user ? "/dashboard" : "/login"}>{user ? "Open the dashboard →" : "Sign in →"}</Link>
+      </p>
+      <p className="muted">
+        Built with Next.js, Supabase, Stripe, and{" "}
+        <a href="https://www.usagegate.io">UsageGate</a> for plans, usage limits and credits.
       </p>
     </main>
   );

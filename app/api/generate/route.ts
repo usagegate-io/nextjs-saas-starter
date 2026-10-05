@@ -1,21 +1,16 @@
-import { getUserId } from "../../../lib/auth";
-import { gate } from "../../../lib/gate";
+import { currentUser } from "../../../lib/auth";
+import { CREDITS, gate } from "../../../lib/gate";
 
-const FEATURE = "ai_credits";
-
-/** The expensive route: check the plan before the work, spend after it. */
+/** The same check as the dashboard button, as a JSON API (for an API product or a mobile app). */
 export async function POST(req: Request) {
-  const userId = await getUserId(req);
-  if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
+  const user = await currentUser();
+  if (!user) return Response.json({ error: "unauthorized" }, { status: 401 });
 
-  if (!(await gate().canAccess(userId, FEATURE))) {
-    return Response.json({ error: "upgrade", upgradeUrl: "/pricing" }, { status: 402 });
+  const spent = await gate().consume(user.id, CREDITS, 1);
+  if (!spent.success) {
+    return Response.json({ error: "out of credits", upgradeUrl: "/dashboard" }, { status: 402 });
   }
 
-  const { prompt } = (await req.json()) as { prompt?: string };
-  const result = `Generated for: ${prompt ?? ""}`;
-
-  await gate().consume(userId, FEATURE, 1);
-
-  return Response.json({ result });
+  const { prompt } = (await req.json().catch(() => ({}))) as { prompt?: string };
+  return Response.json({ result: `Generated for: ${prompt ?? ""}`, remaining: spent.remaining });
 }

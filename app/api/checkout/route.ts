@@ -1,23 +1,26 @@
+import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-import { getUserId } from "../../../lib/auth";
+import { currentUser } from "../../../lib/auth";
 
 /**
  * Stripe Checkout for the paid plan. UsageGate reads end_user_id from the
  * subscription and the Price id to pick the plan, so both must be set.
  */
-export async function POST(req: Request) {
-  const userId = await getUserId(req);
-  if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
+export async function POST(request: Request) {
+  const user = await currentUser();
+  if (!user) return NextResponse.redirect(new URL("/login", request.url), { status: 303 });
 
+  const origin = new URL(request.url).origin;
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     line_items: [{ price: process.env.STRIPE_PRICE_PRO!, quantity: 1 }],
-    success_url: `${process.env.APP_URL}/?upgraded=1`,
-    cancel_url: `${process.env.APP_URL}/?canceled=1`,
-    subscription_data: { metadata: { end_user_id: userId } },
+    customer_email: user.email,
+    success_url: `${origin}/dashboard?upgraded=1`,
+    cancel_url: `${origin}/dashboard`,
+    subscription_data: { metadata: { end_user_id: user.id } },
   });
 
-  return Response.json({ url: session.url });
+  return NextResponse.redirect(session.url!, { status: 303 });
 }

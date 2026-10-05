@@ -1,19 +1,21 @@
 {
   "name": "nextjs-saas-starter",
   "private": true,
-  "version": "0.1.0",
-  "description": "Next.js SaaS starter with entitlements wired in: UsageGate for plan limits, seats, and credits; Stripe or any gateway for payments.",
+  "version": "0.2.0",
+  "description": "Next.js SaaS starter: Supabase login, Stripe subscriptions, and UsageGate for plans, usage limits and credits.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start"
   },
   "dependencies": {
-    "@usagegate/sdk": "^0.1.1",
-    "next": "^16.3.3",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "stripe": "^22.5.0"
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.2",
+    "@usagegate/sdk": "^0.1.2",
+    "next": "^16.3.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "stripe": "^23.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

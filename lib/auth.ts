@@ -1,15 +1,14 @@
+import type { User } from "@supabase/supabase-js";
+
+import { supabaseServer } from "./supabase/server";
+
 /**
- * Replace with your auth provider. The id you return here is the one UsageGate
- * tracks, and the one Stripe Checkout must carry in end_user_id.
- *
- * Clerk:
- *   import { auth } from "@clerk/nextjs/server";
- *   const { userId } = await auth();
- *
- * Supabase:
- *   const { data } = await supabase.auth.getUser();
- *   const userId = data.user?.id ?? null;
+ * The signed-in user, or null. Its id is the one UsageGate tracks and the one
+ * Stripe Checkout carries in end_user_id. Using Clerk instead? Return
+ * `(await auth()).userId` from "@clerk/nextjs/server" and keep the rest.
  */
-export async function getUserId(req: Request): Promise<string | null> {
-  return req.headers.get("x-user-id");
+export async function currentUser(): Promise<User | null> {
+  const supabase = await supabaseServer();
+  const { data } = await supabase.auth.getUser();
+  return data.user;
 }
